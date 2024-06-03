@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checklist</title>
+    <script>
+        async function fetchTarefas() {
+            const response = await fetch('http://localhost:5000/tarefas');
+            const tarefas = await response.json();
+            const tarefasList = document.getElementById('tarefas');
+            tarefasList.innerHTML = '';
+            tarefas.forEach(tarefa => {
+                const li = document.createElement('li');
+                li.textContent = tarefa.tarefa;
+                const btn = document.createElement('button');
+                btn.textContent = 'Excluir';
+                btn.onclick = async () => {
+                    await fetch(`http://localhost:5000/tarefas/${tarefa.tarefa}`, { method: 'DELETE' });
+                    fetchTarefas();
+                };
+                li.appendChild(btn);
+                tarefasList.appendChild(li);
+            });
+        }
+
+        async function addTarefa(event) {
+            event.preventDefault();
+            const tarefaInput = document.getElementById('tarefa');
+            await fetch('http://localhost:5000/tarefas', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ tarefa: tarefaInput.value })
+            });
+            tarefaInput.value = '';
+            fetchTarefas();
+        }
+
+        window.onload = fetchTarefas;
+    </script>
+</head>
+<body>
+    <h1>Checklist</h1>
+    <form onsubmit="addTarefa(event)">
+        <input type="text" id="tarefa" placeholder="Nova tarefa" required>
+        <button type="submit">Adicionar</button>
+    </form>
+    <ul id="tarefas"></ul>
+</body>
+</html>
